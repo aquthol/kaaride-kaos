@@ -109,7 +109,7 @@ export class GameScene extends Phaser.Scene {
       this.players.push(player);
     });
 
-    this.interaction = new InteractionSystem(this.stations);
+    this.interaction = new InteractionSystem(this.stations, () => this.customers);
     this.score = new ScoreSystem(this);
     this.spawner = new SpawnSystem(
       this,
@@ -148,7 +148,7 @@ export class GameScene extends Phaser.Scene {
     this.interaction.update(this.players, dt);
     this.spawner.update(dt, this.elapsed);
     for (const s of this.stations) s.update(dt, time);
-    for (const c of this.customers) c.update(dt, time);
+    for (const c of this.customers) c.update(dt, time, this.players);
     this.customers = this.customers.filter((c) => !c.removed);
     for (const p of this.players) p.lateUpdate(dt, time);
 

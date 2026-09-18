@@ -38,5 +38,6 @@ export function randomCustomerLook(options: CustomerLookOptions): CharacterLook 
     bodyTint: pick(options.clothes),
     legsTint: pick(options.pants),
     accessory: options.accessory,
+    faceAccessory: options.faceAccessory,
   };
 }

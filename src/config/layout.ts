@@ -55,6 +55,21 @@ export const LAYOUT = {
     { kind: 'colour', x: 1040, y: 620 },
     { kind: 'checkout', x: 420, y: 596 },
   ] as StationPlacement[],
+  /**
+   * Open floor spots a restless customer (a bored child) wanders between.
+   * Every one is clear of furniture and of the doorway lane, and reachable on
+   * foot, so the player can always walk over and pick them up.
+   */
+  wanderPoints: [
+    { x: 330, y: 380 },
+    { x: 470, y: 430 },
+    { x: 620, y: 360 },
+    { x: 560, y: 560 },
+    { x: 760, y: 430 },
+    { x: 900, y: 360 },
+    { x: 1020, y: 470 },
+    { x: 700, y: 620 },
+  ] as Point[],
   props: [
     { prop: 'plant', x: 300, y: 236 },
     { prop: 'plant', x: 1000, y: 236 },

@@ -67,6 +67,11 @@ export class CharacterView extends Phaser.GameObjects.Container {
     this.face = scene.add.image(0, HEAD_Y + 3, faceKey('happy'));
     parts.push(this.face);
     this.frontParts.push(this.face);
+    if (look.faceAccessory) {
+      const worn = scene.add.image(0, HEAD_Y + 1, look.faceAccessory);
+      parts.push(worn);
+      this.frontParts.push(worn);
+    }
     const frontKey = hairFrontKey(look.hairStyle);
     if (scene.textures.exists(frontKey)) {
       const front = scene.add.image(0, HEAD_Y, frontKey).setTint(look.hairColor);

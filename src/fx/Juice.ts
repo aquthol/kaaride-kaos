@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { DEPTH } from '../world/depth';
 
 type Scalable = Phaser.GameObjects.GameObject & Phaser.GameObjects.Components.Transform;
 
@@ -22,6 +23,24 @@ export function bump(scene: Phaser.Scene, target: Scalable, amount = 0.12, durat
     duration: duration * 3,
     ease: 'Elastic.easeOut',
   });
+}
+
+/** Press-photographer flash: a white wash over the screen and a tiny jolt. */
+export function cameraFlash(scene: Phaser.Scene): void {
+  const cam = scene.cameras.main;
+  const flash = scene.add
+    .rectangle(0, 0, cam.width, cam.height, 0xffffff, 0.85)
+    .setOrigin(0)
+    .setDepth(DEPTH.hud + 20)
+    .setScrollFactor(0);
+  scene.tweens.add({
+    targets: flash,
+    alpha: 0,
+    duration: 260,
+    ease: 'Quad.easeOut',
+    onComplete: () => flash.destroy(),
+  });
+  cam.shake(120, 0.004);
 }
 
 /** Scale an object in from zero with an overshoot. */

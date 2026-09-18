@@ -1,6 +1,8 @@
+import Phaser from 'phaser';
 import { AudioEngine } from '../audio/AudioEngine';
 import { PLAYER } from '../config/gameConfig';
 import { PALETTE } from '../config/palette';
+import type { Customer } from '../entities/Customer';
 import type { Player } from '../entities/Player';
 import { Particles } from '../fx/Particles';
 import type { Station } from '../stations/Station';
@@ -10,7 +12,11 @@ export class InteractionSystem {
   /** Who is currently working each station. One worker per station, first come. */
   private readonly claims = new Map<Station, Player>();
 
-  constructor(private readonly stations: Station[]) {}
+  constructor(
+    private readonly stations: Station[],
+    /** Everyone in the salon, so loose customers can be picked up off the floor. */
+    private readonly customers: () => readonly Customer[] = () => [],
+  ) {}
 
   update(players: Player[], dt: number): void {
     for (const s of this.stations) s.setHighlight(null);
@@ -67,17 +73,39 @@ export class InteractionSystem {
 
   private pickUp(p: Player): void {
     const station = this.inRange(p).find((s) => s.occupant !== null);
+    const loose = this.looseInRange(p);
+    // Whoever is closer: someone at a station, or someone standing loose in the salon
+    if (loose && (!station || loose.distance < station.distanceTo(p.reachPoint(PLAYER.reachDistance)))) {
+      this.take(p, loose.customer);
+      return;
+    }
     if (!station) return;
     if (!station.canRelease()) {
       station.refuse();
       AudioEngine.get().play('refuse');
       return;
     }
-    const customer = station.release();
+    this.take(p, station.release());
+  }
+
+  private take(p: Player, customer: Customer): void {
     customer.pickUp(p);
     p.carrying = customer;
     p.view.punch(0.16);
     AudioEngine.get().play('pickUp');
+  }
+
+  /** The nearest customer who is not at a station and not already being carried. */
+  private looseInRange(p: Player): { customer: Customer; distance: number } | null {
+    const reach = p.reachPoint(PLAYER.reachDistance);
+    let best: { customer: Customer; distance: number } | null = null;
+    for (const c of this.customers()) {
+      if (c.state !== 'wandering' || c.removed) continue;
+      const distance = Phaser.Math.Distance.Between(reach.x, reach.y, c.x, c.y);
+      if (distance > PLAYER.interactRange) continue;
+      if (!best || distance < best.distance) best = { customer: c, distance };
+    }
+    return best;
   }
 
   private putDown(p: Player): void {

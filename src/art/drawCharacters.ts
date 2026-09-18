@@ -159,6 +159,24 @@ const HAIR_DRAWERS: Record<HairStyle, HairDrawers> = {
     },
     rearExtra: (g) => puffs(g, [...arcPuffs(18, 9, 8), [20, 10, 9], [40, 10, 9], [C, 6, 10]]),
   },
+  pigtails: {
+    back: (g) => puffs(g, [[9, 30, 8], [51, 30, 8]], HAIR_SHADE),
+    front: (g) => {
+      cap(g, [
+        [48, 30],
+        [42, 21],
+        [30, 24],
+        [18, 21],
+        [12, 30],
+      ]);
+      // A bunch either side, each tied off with a little band
+      for (const x of [9, 51]) {
+        circle(g, x, 30, 8, HAIR, HAIR_LINE);
+        rrect(g, x - 4, 20, 8, 5, 2, HAIR_SHADE, HAIR_LINE, 1.5);
+      }
+    },
+    rearExtra: (g) => puffs(g, [[9, 30, 8], [51, 30, 8]]),
+  },
   bald: {
     front: (g) => {
       rrect(g, 12, 26, 6, 12, 3, HAIR, HAIR_LINE, 1.5);

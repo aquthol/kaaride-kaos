@@ -5,7 +5,7 @@ import { PATIENCE } from '../config/gameConfig';
 import { LAYOUT } from '../config/layout';
 import { PALETTE } from '../config/palette';
 import type { RecipeDef } from '../config/recipes';
-import { popIn } from '../fx/Juice';
+import { cameraFlash, popIn } from '../fx/Juice';
 import { Particles } from '../fx/Particles';
 import type { Station } from '../stations/Station';
 import { GameEvent, type LeaveReason } from '../systems/events';
@@ -18,9 +18,10 @@ import { pathToDoor } from '../world/walkPaths';
 import { CharacterView } from './CharacterView';
 import { randomCustomerLook } from './looks';
 import { moodForPatience } from './mood';
+import { Pet } from './Pet';
 import type { Player } from './Player';
 
-export type CustomerState = 'entering' | 'seated' | 'carried' | 'leaving';
+export type CustomerState = 'entering' | 'seated' | 'carried' | 'leaving' | 'wandering';
 
 const WALK_SPEED = 150;
 /** Angry customers storm out faster. */
@@ -59,6 +60,10 @@ export class Customer {
   private leaveReason: LeaveReason | null = null;
   private fxTimer = 0;
   private wet = false;
+  /** Counts down while sitting in the waiting area, for types that wander off. */
+  private wanderCountdown: number;
+  /** Companion that walked in with them, if their type brings one. */
+  readonly pet: Pet | null;
 
   constructor(
     private readonly scene: Phaser.Scene,
@@ -80,9 +85,17 @@ export class Customer {
     this.patienceBar = new PatienceBar(scene, 0, this.bubble.extraRowY, barWidth);
     this.bubble.add(this.patienceBar);
 
+    if (type.scale !== undefined) this.view.setScale(type.scale);
+    this.wanderCountdown = type.wanderAfter ?? Infinity;
+    this.pet = type.pet ? new Pet(scene, type.pet, { x: spawn.x + 26, y: spawn.y }) : null;
+
     popIn(scene, this.view, 0, 380);
     Particles.of(scene)?.sparkle(LAYOUT.door.x, LAYOUT.door.y - 40, 6);
     AudioEngine.get().play('customerArrive');
+    if (type.arrival === 'flash') {
+      cameraFlash(scene);
+      AudioEngine.get().play('cameraShutter');
+    }
   }
 
   get headY(): number {
@@ -152,6 +165,8 @@ export class Customer {
     this.station = station;
     this.carrier = null;
     this.path = [];
+    // Restless types give the salon a fresh grace period each time they are seated
+    this.wanderCountdown = this.type.wanderAfter ?? Infinity;
     const seat = station.seatPoint;
     this.depthOverride = station.customerDepth;
     this.view.setGrounded(!station.seatsCustomer, !station.seatsCustomer);
@@ -172,6 +187,43 @@ export class Customer {
     this.view.punch(0.2);
     this.scene.tweens.add({ targets: this.pos, x: player.x, y: player.y + 1, duration: 110 });
     this.scene.tweens.add({ targets: this.view, lift: CARRY_LIFT, duration: 160, ease: 'Back.easeOut' });
+  }
+
+  /**
+   * Slip off the waiting chair and mill around the salon until someone picks
+   * them up again. Driven by `wanderAfter` in the customer type.
+   */
+  private startWandering(): void {
+    this.station?.clear(this);
+    this.station = null;
+    this.state = 'wandering';
+    this.depthOverride = null;
+    this.scene.tweens.killTweensOf(this.pos);
+    this.scene.tweens.add({ targets: this.view, lift: 0, duration: 150 });
+    this.view.setGrounded(true);
+    this.view.punch(0.16);
+    AudioEngine.get().play('giggle');
+    this.wanderToNewSpot();
+  }
+
+  private wanderToNewSpot(): void {
+    // Hop to one of the nearest few spots, so the route stays short and tidy
+    // instead of striding diagonally across the salon furniture.
+    const nearby = LAYOUT.wanderPoints
+      .filter((p) => Phaser.Math.Distance.Between(p.x, p.y, this.pos.x, this.pos.y) > 60)
+      .sort(
+        (a, b) =>
+          Phaser.Math.Distance.Between(a.x, a.y, this.pos.x, this.pos.y) -
+          Phaser.Math.Distance.Between(b.x, b.y, this.pos.x, this.pos.y),
+      )
+      .slice(0, 3);
+    const next = Phaser.Utils.Array.GetRandom(nearby) ?? Phaser.Utils.Array.GetRandom([...LAYOUT.wanderPoints]);
+    this.walk([next], () => {
+      // Pause a beat, then pick somewhere else
+      this.scene.time.delayedCall(400 + Math.random() * 900, () => {
+        if (this.state === 'wandering' && !this.removed) this.wanderToNewSpot();
+      });
+    });
   }
 
   /** Walk out of the salon. Callers emit score events. */
@@ -205,6 +257,7 @@ export class Customer {
         AudioEngine.get().play('angry');
       }
     }
+    this.pet?.sendTo(LAYOUT.door); // the dog heads for the door too
     this.walk(pathToDoor(this.pos), () => {
       this.scene.tweens.add({
         targets: this.view,
@@ -215,7 +268,7 @@ export class Customer {
     });
   }
 
-  update(dt: number, time: number): void {
+  update(dt: number, time: number, players: readonly Player[] = []): void {
     if (this.state !== 'leaving') {
       this.patience = Math.max(0, this.patience - dt * this.drainMultiplier());
       this.setMood(moodForPatience(this.patienceRatio));
@@ -224,6 +277,12 @@ export class Customer {
         this.scene.events.emit(GameEvent.CustomerAngry, this, 'impatient');
         this.leave('impatient');
       }
+    }
+
+    // Bored in the waiting area for too long? Off they go.
+    if (this.state === 'seated' && this.station?.kind === 'wait') {
+      this.wanderCountdown -= dt;
+      if (this.wanderCountdown <= 0) this.startWandering();
     }
 
     let moving = false;
@@ -245,10 +304,17 @@ export class Customer {
     const stationLift = this.state === 'seated' ? (this.station?.bubbleLift ?? 0) : 0;
     // Nervous jitter when patience is running low
     const jitter = this.patienceRatio < PATIENCE.neutralAbove ? Math.sin(time * 0.06) * 1.6 : 0;
-    this.bubble.setPosition(this.pos.x + jitter, this.pos.y - BUBBLE_OFFSET - this.view.lift - stationLift);
+    // Offsets are in body units, so they shrink with a smaller customer (a child)
+    const bodyScale = this.view.scaleY;
+    this.bubble.setPosition(
+      this.pos.x + jitter,
+      this.pos.y - (BUBBLE_OFFSET + this.view.lift) * bodyScale - stationLift,
+    );
     this.bubble.tick(time);
 
     if (this.leaveReason && this.leaveReason !== 'served') this.emitLeavingFx(dt);
+    // The owner drives their pet, so the game loop needs no knowledge of it
+    this.pet?.update(dt, time, this.pos, players);
   }
 
   private emitLeavingFx(dt: number): void {
@@ -300,5 +366,6 @@ export class Customer {
     this.scene.tweens.killTweensOf([this.pos, this.view]);
     this.view.destroy();
     this.bubble.destroy();
+    this.pet?.destroy();
   }
 }

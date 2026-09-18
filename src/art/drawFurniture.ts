@@ -234,6 +234,17 @@ export function generateFurnitureTextures(scene: Phaser.Scene): void {
     gloss(g, 22, 62, 12, 26, 0.35);
   });
 
+  // Sunglasses for the celebrity, sized to sit across the head
+  makeTexture(scene, TEX.shades, 38, 16, (g) => {
+    rrect(g, 2, 3, 15, 11, 4, 0x2b2530, P.outline, 1.5);
+    rrect(g, 21, 3, 15, 11, 4, 0x2b2530, P.outline, 1.5);
+    g.lineStyle(2, P.outline, 1);
+    g.lineBetween(17, 7, 21, 7);
+    g.fillStyle(0xffffff, 0.45);
+    g.fillRect(4, 5, 4, 3);
+    g.fillRect(23, 5, 4, 3);
+  });
+
   // Pearl necklace accessory for Proua Helgi
   makeTexture(scene, TEX.pearls, 30, 16, (g) => {
     for (let i = 0; i <= 8; i++) {

@@ -55,6 +55,26 @@ export const SFX = {
       { type: 'sine', freq: 1760, at: 0.16, dur: 0.24, gain: 0.07, release: 0.25 },
     ],
   },
+  /** A bored child slipping off the chair. */
+  giggle: {
+    tones: [
+      { type: 'sine', freq: 780, freqEnd: 1040, dur: 0.07, gain: 0.08, jitter: 0.03 },
+      { type: 'sine', freq: 980, freqEnd: 1240, at: 0.09, dur: 0.08, gain: 0.08, jitter: 0.03 },
+    ],
+  },
+  /** Press photographers greeting the celebrity. */
+  cameraShutter: {
+    tones: [{ type: 'square', freq: 1600, dur: 0.02, gain: 0.05, lowpass: 3000 }],
+    noises: [
+      { freq: 4200, dur: 0.04, gain: 0.09, q: 1.2 },
+      { freq: 2600, freqEnd: 900, at: 0.05, dur: 0.12, gain: 0.05, q: 0.8 },
+    ],
+  },
+  /** The dog, when someone trips over it. */
+  bark: {
+    tones: [{ type: 'sawtooth', freq: 300, freqEnd: 190, dur: 0.1, gain: 0.08, lowpass: 900, jitter: 0.05 }],
+    noises: [{ filter: 'bandpass', freq: 900, freqEnd: 500, dur: 0.09, gain: 0.07, q: 1.4 }],
+  },
   /** A recipe step finished: bright sparkle arpeggio. */
   stepDone: {
     tones: [

@@ -33,7 +33,7 @@ export const LEVELS: LevelDef[] = [
     spawn: { intervalStart: 13, intervalEnd: 7, maxConcurrent: 5 },
     stations: BASE_STATIONS,
     recipes: ['quick', 'classic', 'festive'],
-    customerTypes: ['normal', 'helgi'],
+    customerTypes: ['normal', 'helgi', 'laps'],
     // Measured ideal-play ceiling ≈ €306; the tutorial level keeps 3 stars a touch softer
     starThresholds: [60, 130, 210],
   },
@@ -45,7 +45,7 @@ export const LEVELS: LevelDef[] = [
     spawn: { intervalStart: 11, intervalEnd: 6, maxConcurrent: 6 },
     stations: [...BASE_STATIONS, 'colour'],
     recipes: ['quick', 'classic', 'festive', 'colour'],
-    customerTypes: ['normal', 'helgi'],
+    customerTypes: ['normal', 'helgi', 'laps', 'dogowner'],
     // Ceiling ≈ €411
     starThresholds: [80, 180, 280],
   },
@@ -57,7 +57,7 @@ export const LEVELS: LevelDef[] = [
     spawn: { intervalStart: 9, intervalEnd: 5, maxConcurrent: 6 },
     stations: [...BASE_STATIONS, 'colour'],
     recipes: ['classic', 'festive', 'colour', 'bridal'],
-    customerTypes: ['normal', 'helgi'],
+    customerTypes: ['normal', 'helgi', 'laps', 'dogowner', 'staar'],
     // Ceiling ≈ €435; the hardest three-star target of the three
     starThresholds: [100, 220, 340],
   },

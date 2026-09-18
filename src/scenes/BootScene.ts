@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { generateAllTextures } from '../art/generateTextures';
-import { DEMO } from '../config/gameConfig';
+import { DEMO, FORCED_LEVEL, FORCED_PLAYERS } from '../config/gameConfig';
 
 export class BootScene extends Phaser.Scene {
   constructor() {
@@ -9,7 +9,9 @@ export class BootScene extends Phaser.Scene {
 
   create(): void {
     generateAllTextures(this);
-    // ?demo skips the menu for quick visual checks.
-    this.scene.start(DEMO ? 'Game' : 'Menu');
+    // ?demo, ?level= and ?players= are testing shortcuts: drop straight into a
+    // round, skipping the menu and the level select (and any level locks).
+    const skipMenu = DEMO || FORCED_LEVEL !== '' || FORCED_PLAYERS > 0;
+    this.scene.start(skipMenu ? 'Game' : 'Menu');
   }
 }

@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { CUSTOMER_TYPES, type CustomerTypeDef } from '../config/customerTypes';
+import { getCustomerTypes, type CustomerTypeDef } from '../config/customerTypes';
 import type { LevelDef } from '../config/levels';
 import { LAYOUT } from '../config/layout';
 import { getRecipes, type RecipeDef } from '../config/recipes';
@@ -24,7 +24,7 @@ export class SpawnSystem {
     this.timer = level.spawn.firstSpawnDelay ?? 1.5;
     // Only what this level allows; `unlockAt` then paces them within the round
     this.recipes = getRecipes(level.recipes);
-    this.types = CUSTOMER_TYPES.filter((c) => level.customerTypes.includes(c.id));
+    this.types = getCustomerTypes(level.customerTypes);
   }
 
   update(dt: number, elapsed: number): void {

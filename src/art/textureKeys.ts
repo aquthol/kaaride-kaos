@@ -24,6 +24,8 @@ export const TEX = {
   rasmusBody: 'rasmus-body',
   karlBody: 'karl-body',
   pearls: 'acc-pearls',
+  shades: 'acc-shades',
+  dog: 'pet-dog',
   // pixel for misc fills
   pixel: 'pixel',
 } as const;

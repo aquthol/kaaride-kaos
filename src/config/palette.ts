@@ -72,6 +72,14 @@ export const PALETTE = {
   karlPants: 0x5b4a5f,
   helgiHair: 0xd9cdf2,
   helgiCardigan: 0xa05a8c,
+  /** Bright, playful shades for children. */
+  childHair: [0xe8913f, 0xc9a227, 0x6b4430, 0xd94f4f, 0x3b2a22],
+  childClothes: [0xffd166, 0x8fd3c4, 0xff9fb1, 0x9ad6ff, 0xc3f08a],
+  starHair: 0xf7e7a6,
+  starOutfit: 0xd94f9e,
+  dogFur: 0xd6a06a,
+  dogFurDark: 0xa9764a,
+  dogNose: 0x3a2b2b,
 
   // Faces
   eye: 0x2d1f28,

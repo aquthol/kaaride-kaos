@@ -4,6 +4,7 @@ import { generateFaceTextures } from './drawFaces';
 import { generateFurnitureTextures } from './drawFurniture';
 import { generateFxTextures } from './drawFx';
 import { generateIconTextures } from './drawIcons';
+import { generatePetTextures } from './drawPets';
 import { generateRoomTextures } from './drawRoom';
 
 /** Bake every procedural texture once at boot. */
@@ -14,4 +15,5 @@ export function generateAllTextures(scene: Phaser.Scene): void {
   generateFaceTextures(scene);
   generateIconTextures(scene);
   generateFxTextures(scene);
+  generatePetTextures(scene);
 }

@@ -31,10 +31,10 @@ export class Checkout extends Station {
   protected override onPlaced(customer: Customer): void {
     this.scene.time.delayedCall(PAY_DELAY, () => {
       if (customer.station !== this) return;
-      const payout =
-        customer.recipe.price + Math.round(SCORE.baseTip * customer.patienceRatio * customer.type.tipMultiplier);
+      const price = Math.round(customer.recipe.price * (customer.type.priceMultiplier ?? 1));
+      const payout = price + Math.round(SCORE.baseTip * customer.patienceRatio * customer.type.tipMultiplier);
       // A better tip rings out brighter
-      const tipShare = Math.min(1, (payout - customer.recipe.price) / (SCORE.baseTip * 2));
+      const tipShare = Math.min(1, (payout - price) / (SCORE.baseTip * 2));
       AudioEngine.get().play('payout', { pitch: 1 + tipShare * 0.28 });
       this.scene.events.emit(GameEvent.CustomerServed, customer, payout);
       customer.leave('served');

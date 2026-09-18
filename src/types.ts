@@ -6,7 +6,16 @@ export type StepKind = Extract<StationKind, 'wash' | 'cut' | 'colour' | 'dry'>;
 
 export type Mood = 'happy' | 'neutral' | 'angry' | 'burnt';
 
-export type HairStyle = 'quiff' | 'short' | 'bob' | 'bun' | 'curly' | 'long' | 'perm' | 'bald';
+export type HairStyle =
+  | 'quiff'
+  | 'short'
+  | 'bob'
+  | 'bun'
+  | 'curly'
+  | 'long'
+  | 'perm'
+  | 'bald'
+  | 'pigtails';
 
 /** Everything needed to draw a character. Colors are 0xRRGGBB. */
 export interface CharacterLook {
@@ -19,6 +28,8 @@ export interface CharacterLook {
   legsTint: number;
   /** Optional overlay drawn on top of the torso (e.g. pearls). */
   accessory?: string;
+  /** Optional overlay drawn at head height (e.g. sunglasses). */
+  faceAccessory?: string;
 }
 
 export interface Point {

@@ -22,6 +22,16 @@ export class Player {
   /** True on frames where the player is working a station. */
   working = false;
 
+  /** Temporary speed penalty from the world (a dog underfoot, say). */
+  private slowTimer = 0;
+  private slowMultiplier = 1;
+
+  /** Slow this player down for a moment. Any source can call this. */
+  applySlow(seconds: number, multiplier: number): void {
+    this.slowTimer = Math.max(this.slowTimer, seconds);
+    this.slowMultiplier = Math.min(this.slowMultiplier, multiplier);
+  }
+
   private readonly body: Phaser.Physics.Arcade.Body;
   private readonly dashDir = new Phaser.Math.Vector2();
   private dashTimer = 0;
@@ -75,6 +85,10 @@ export class Player {
 
   update(dt: number): void {
     this.input.poll();
+    if (this.slowTimer > 0) {
+      this.slowTimer -= dt;
+      if (this.slowTimer <= 0) this.slowMultiplier = 1;
+    }
     const axis = this.input.axis();
     this.dashCooldown = Math.max(0, this.dashCooldown - dt);
     this.moving = axis.lengthSq() > 0;
@@ -84,7 +98,8 @@ export class Player {
       this.dashTimer -= dt;
       this.body.setVelocity(this.dashDir.x * PLAYER.dashSpeed, this.dashDir.y * PLAYER.dashSpeed);
     } else {
-      const speed = PLAYER.speed * (this.carrying ? PLAYER.carrySpeedMultiplier : 1);
+      const speed =
+        PLAYER.speed * (this.carrying ? PLAYER.carrySpeedMultiplier : 1) * this.slowMultiplier;
       this.body.setVelocity(axis.x * speed, axis.y * speed);
       if (this.input.justPressed('dash') && this.dashCooldown <= 0) {
         this.dashTimer = PLAYER.dashDuration;
