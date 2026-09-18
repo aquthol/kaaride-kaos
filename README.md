@@ -3,7 +3,7 @@
 Kiire juuksurisalongi mäng *Overcooked*'i vaimus. Sina oled Rasmus: jooksed mööda salongi, tassid kliente jaamade vahel ja püüad nad kassasse saada enne, kui kannatus otsa saab.
 
 **Mängi siin:** _(link tuleb siia, kui GitHub Pages on sisse lülitatud)_
-`https://<kasutajanimi>.github.io/kaaride-kaos/`
+`https://aquthol.github.io/kaaride-kaos/`
 
 Mäng töötab brauseris, midagi ei pea installima. Kogu graafika ja heli on koodiga genereeritud — mängus pole ühtegi allalaaditud pilti ega helifaili.
 
